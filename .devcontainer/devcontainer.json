@@ -20,6 +20,8 @@
 		"ghcr.io/devcontainers/features/github-cli:1": {}
 	  },
 
+	// TODO: add git customization
+
 	// Configure tool-specific properties.
 	// "customizations": {},
 
