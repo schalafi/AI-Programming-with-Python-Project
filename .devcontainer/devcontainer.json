@@ -15,6 +15,11 @@
 	// "postCreateCommand": "pip3 install --user -r requirements.txt",
 	"postCreateCommand": "pip3 install --user -r requirements.txt",
 
+	//Add the gh command line tool 
+	"features": {
+		"ghcr.io/devcontainers/features/github-cli:1": {}
+	  },
+
 	// Configure tool-specific properties.
 	// "customizations": {},
 
