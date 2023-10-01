@@ -180,7 +180,9 @@ def build_model(name:str,
 
     models_available = {
         'vgg16': models.vgg16(weights = models.VGG16_Weights.DEFAULT),
-        'densenet121': models.densenet121(weights = models.DenseNet121_Weights.DEFAULT)
+        'densenet121': models.densenet121(weights = models.DenseNet121_Weights.DEFAULT),
+        'resnet18': models.resnet18(weights = models.ResNet18_Weights.DEFAULT),
+        'alexnet': models.alexnet(weights = models.AlexNet_Weights.DEFAULT),
     }
 
     model = None 
@@ -212,12 +214,23 @@ def build_model(name:str,
     num_classes =  len(classes_names)
     print("Number of classes: ", num_classes)
 
+    #TODO: Replace last layer using dict
+    #add resnet
+    replaceable_layer = {'vgg16':'classifier',
+        'densenet121':'classifier' ,
+        #'resnet18':'fc' ,
+        'alexnet':'classifier',}
+
+    n_ouputs = model.classifier[0].in_features
+    print("Number of outputs in penultimate layer: ", n_ouputs)
+    print("MODEL ARCH: ", model)
+
     # Replace the clasifier (last layer ) with a new one
     model.classifier = th.nn.Sequential(
-    th.nn.BatchNorm1d(1024),
+    th.nn.BatchNorm1d(n_ouputs),
     #input_features must have the the same number of out_features as 
     #norm5 layer in the original pretrained net (DenseNet)
-    th.nn.Linear(in_features=1024,
+    th.nn.Linear(in_features=n_ouputs,
                     out_features=n_hidden_units,
                     bias = True),
     th.nn.ReLU(),
