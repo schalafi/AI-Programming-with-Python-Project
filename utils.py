@@ -11,9 +11,9 @@ from torchvision.transforms import v2
 #Model related
 from torchvision import models
 
+import training_functions
+import checkpoint_utils
 
-
-BATCH_SIZE = 64
 
 data_dir = 'flowers'
 train_dir = data_dir + '/train'
@@ -31,15 +31,20 @@ def print_data_shape(dataloader,name = 'train'):
     print("Shape: ", y.shape)
     print()
 
-def get_dataloaders():
+def get_dataloaders(data_dir:str,batch_size:int):
     """
+    Args:
+        data_dir: directory containing train, validation and test data, 
+        each one has is own subfolder.
+        train, valid and test
+        bathc_size: number of examples per batch
+
     Return a dictionary with 
     'train', 'valid', 'test' keys
     each with a dataloader
 
     """
     
-
     train_transforms = v2.Compose([
     #Data augmentation with transformations
     v2.RandomRotation(degrees =(0,180)),
@@ -80,24 +85,24 @@ def get_dataloaders():
     transforms = {
         'train': train_transforms,
         'valid': valid_transforms,
-        'test': test_transforms'
+        'test': test_transforms
     }
 
 
     # TODO: Load the datasets with ImageFolder
     #image_datasets = datasets.ImageFolder()
     train_dataset = datasets.ImageFolder(
-        root = train_dir,
+        root = data_dir + '/train',
         transform = train_transforms
     )
 
     valid_dataset = datasets.ImageFolder(
-        root = valid_dir,
+        root = data_dir + '/valid',
         transform=valid_transforms
     )
 
     test_dataset = datasets.ImageFolder(
-        root = test_dir,
+        root = data_dir + '/test',
         transform = test_transforms
     )
 
@@ -110,18 +115,18 @@ def get_dataloaders():
     #dataloaders = 
     train_dataloader = DataLoader(
         train_dataset,
-        batch_size=BATCH_SIZE,
+        batch_size=batch_size,
         shuffle= True, # Shuffle only for training
         )
 
     valid_dataloader = DataLoader(
         valid_dataset,
-        batch_size=BATCH_SIZE
+        batch_size=batch_size
     )
 
     test_dataloader = DataLoader(
         test_dataset,
-        batch_size=BATCH_SIZE
+        batch_size=batch_size
     )
 
     dataloaders = {'train': train_dataloader,
@@ -196,10 +201,9 @@ def build_model(name:str,
     
     if device_name == 'gpu':
         if not  th.cuda.is_available():
-            #print in yellow a warning indicating that the gpu is not available
             print("\033[93m" + "Warning: GPU not available" + "\033[0m")
             print('Cpu will be used')
-            name  = 'cpu'
+            device_name  = 'cpu'
 
     device = th.device(device_name)
     print("Device: ", device)
@@ -243,3 +247,108 @@ def build_model(name:str,
     #print("Classifier (trainable layers): ", model.classifier)
 
     return model
+
+
+
+class Trainer():
+    """
+    Train an image classification model 
+
+    """
+    
+    def __init__(self,
+                data_dir:str,
+                save_dir:str,
+                arch:str,
+                learning_rate: float,
+                hidden_units:int,
+                epochs: int,
+                gpu: bool):
+        """
+        Args:
+            data_dir: the path to the data directory
+            save_dir: the path to the save directory
+            arch:     the name of the model architecture
+            learning_rate: the learning rate
+            hidden_units: number of hidden units in the classifier module
+            epochs: number of epochs to train the network
+            gpu: True if gpu is to be used, False otherwise
+        
+        """
+        self.data_dir = data_dir
+        self.save_dir = save_dir
+        self.arch = arch
+        self.learning_rate = learning_rate
+        self.hidden_units = hidden_units
+        self.epochs = epochs
+        self.gpu = gpu
+
+        device_name = 'gpu' if self.gpu else 'cpu'
+
+        if device_name == 'gpu':
+            if not  th.cuda.is_available():
+                print("\033[93m" + "Warning: GPU not available" + "\033[0m")
+                print('Cpu will be used')
+                device_name  = 'cpu'
+        
+        self.device = th.device(device_name)
+        print("Device: ", self.device)
+
+        self.cat_to_name = get_label_mapping()
+        self.model = None
+        
+        ### 1 Load the datasets
+        print("\033[92m" + "Getting dataloaders" + "\033[0m")
+
+        dataloaders = get_dataloaders(
+            data_dir= self.data_dir,
+            batch_size = self.batch_size)
+        self.train_dataset, self.valid_dataset, self.test_dataset = (dataloaders['train'], 
+                                                                     dataloaders['valid'],
+                                                                        dataloaders['test'])
+        print()
+
+        ### 2 Create the model 
+        ### Use the given architecture and replace the classifier with a new trainable module (layers and activations)
+
+        self.model = build_model(name = self.arch,
+                device_name = 'gpu' if self.gpu else 'cpu',
+                train_dataset = self.train_dataset,
+                n_hidden_units =  self.hidden_units)
+        print()
+
+        ### 3 Define the loss function and optimizer
+        # Use negative log likelihood loss
+        self.criterion = th.nn.NLLLoss()
+
+        self.optimizer = th.optim.Adam(
+        #Only pass classifier params
+        self.model.classifier.parameters(),
+        lr = self.learning_rate,
+        weight_decay = 0.001
+        )
+        print()
+
+        ### 4 Train the model
+        self.train()
+        print()
+
+        ### 5 save checkpoint
+        checkpoint_utils.save_checkpoint()
+        print()
+            
+    def train(self):
+
+        training_functions.train(
+            model = self.model,
+            train_dataloader = self.train_dataloader,
+            valid_dataloader = self.valid_dataloader,
+            criterion = self.criterion,
+            optimizer = self.optimizer,
+            device = self.device,
+            epochs = self.epochs,
+           
+        )
+
+        
+

@@ -85,13 +85,26 @@ def tests():
     
 if __name__ == '__main__':
 
-    #parser = get_input_args()
-    #args = parser.parse_args()
+    from utils import Trainer
+    parser = get_input_args()
+    args = parser.parse_args()
     #print all input args
-    #print(args)
+    print(args)
 
-    print("Tests: ")
-    tests()
+    trainer = Trainer(
+        data_dir=args.data_dir,
+        save_dir=args.save_dir,
+        arch=args.arch,
+        learning_rate=args.learning_rate,
+        hidden_units=args.hidden_units,
+        epochs=args.epochs,
+        gpu=args.gpu
+    )
+
+
+
+    #print("Tests: ")
+    #tests()
 
     
     
