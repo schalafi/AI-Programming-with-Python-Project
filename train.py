@@ -48,8 +48,6 @@ def get_input_args():
                         )
     return parser
 
-# Test with 
-#python train.py './data/' --save_dir './models'  --arch 'vgg13' --learning_rate 0.03 --hidden_units 1024 --epochs 10 --gpu False
 
 def tests():
     parser = get_input_args()
@@ -84,8 +82,16 @@ def tests():
 
     
 if __name__ == '__main__':
-
     from utils import Trainer
+
+    # Test with 
+    #vgg16
+    #python train.py './data/' --save_dir './models'  --arch 'vgg16' --learning_rate 0.03 --hidden_units 1024 --epochs 10 --gpu
+    #densenet121
+    #python train.py './data/' --save_dir './models'  --arch 'densenet121' --learning_rate 0.03 --hidden_units 1024 --epochs 10 --gpu
+    #alexnet
+    #python train.py './data/' --save_dir './models'  --arch 'alexnet' --learning_rate 0.03 --hidden_units 1024 --epochs 10 --gpu
+
     parser = get_input_args()
     args = parser.parse_args()
     #print all input args
@@ -100,8 +106,6 @@ if __name__ == '__main__':
         epochs=args.epochs,
         gpu=args.gpu
     )
-
-
 
     #print("Tests: ")
     #tests()

@@ -143,7 +143,7 @@ def get_dataloaders(data_dir:str,batch_size:int):
     return dataloaders 
 
 
-def get_data_sample(dataloader:th.utils.data.Dataloader ):
+def get_data_sample(dataloader:th.utils.data.DataLoader ):
 
     data_iter = iter(dataloader)
     #Get a batch of data
@@ -162,7 +162,7 @@ def get_label_mapping():
         index to label name
     """
 
-    with open('class_to_idx.json', 'r') as f:
+    with open('cat_to_name.json', 'r') as f:
         class_to_idx = json.load(f)
     return class_to_idx
     
@@ -186,7 +186,7 @@ def build_model(name:str,
     models_available = {
         'vgg16': models.vgg16(weights = models.VGG16_Weights.DEFAULT),
         'densenet121': models.densenet121(weights = models.DenseNet121_Weights.DEFAULT),
-        'resnet18': models.resnet18(weights = models.ResNet18_Weights.DEFAULT),
+        #'resnet18': models.resnet18(weights = models.ResNet18_Weights.DEFAULT),
         'alexnet': models.alexnet(weights = models.AlexNet_Weights.DEFAULT),
     }
 
@@ -330,16 +330,25 @@ class Trainer():
         print()
 
         ### 4 Train the model
-        self.train()
+        last_loss_value = self.train()
         print()
 
         ### 5 save checkpoint
-        checkpoint_utils.save_checkpoint()
+        checkpoint_utils.save_checkpoint(
+            model =  self.model,
+            optimizer = self.optimizer,
+            epoch = self.epochs,
+            loss = last_loss_value,
+            path = self.save_dir)
+        
         print()
             
     def train(self):
+        """
+        Return last reported loss on training set
+        """
 
-        training_functions.train(
+        train_losses,train_accuracies, valid_losses,valid_accuracies=  training_functions.train(
             model = self.model,
             train_dataloader = self.train_dataloader,
             valid_dataloader = self.valid_dataloader,
@@ -349,6 +358,9 @@ class Trainer():
             epochs = self.epochs,
            
         )
+
+
+        return train_losses[-1]
 
         
 

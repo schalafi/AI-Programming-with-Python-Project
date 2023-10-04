@@ -193,7 +193,7 @@ def train(model: th.nn.Module,
           criterion: th.nn.Module,
           optimizer: th.optim.Optimizer,
           device: th.device, 
-          epochs : int) -> None:
+          epochs : int) -> tuple[list[float],list[float],list[float],list[float]]:
     """
     Receive a model, train it with the given optimizer
     by ONE epoch, and evelate the model.
@@ -213,8 +213,8 @@ def train(model: th.nn.Module,
     Model weigths are changed in place
     
     Returns:
-    loss_value, accuracy 
-        
+        train_losses, train_accuracies, valid_losses, valid_accuracies
+        each one is a list with the historic losses and accuracies
     """
 
     # Collect loss and accuracy 
@@ -247,4 +247,5 @@ def train(model: th.nn.Module,
       valid_accuracies.append(valid_accuracy)
       
       print()
-      
+    
+    return train_losses, train_accuracies, valid_losses, valid_accuracies

@@ -3,7 +3,11 @@ import os
 import torch as th
 
 
-def save_checkpoint(model, optimizer, epoch, loss, path):
+def save_checkpoint(model: th.nn.Module,
+                    optimizer:th.optim.Optimizer,
+                    epoch: int,
+                    loss: float ,
+                    path:str):
     """
     Save a checkpoint of a PyTorch model for inference or resuming training.
     path must be  the path of the model checkpoint file
