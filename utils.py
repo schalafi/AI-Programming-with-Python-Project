@@ -31,7 +31,7 @@ def print_data_shape(dataloader,name = 'train'):
     print("Shape: ", y.shape)
     print()
 
-def get_dataloaders(data_dir:str,batch_size:int):
+def get_data(data_dir:str,batch_size:int):
     """
     Args:
         data_dir: directory containing train, validation and test data, 
@@ -39,9 +39,10 @@ def get_dataloaders(data_dir:str,batch_size:int):
         train, valid and test
         bathc_size: number of examples per batch
 
-    Return a dictionary with 
-    'train', 'valid', 'test' keys
-    each with a dataloader
+    Return a dictionary with 3 elements
+    'train': (train_dataset,train_dataloader),
+    'valid': (valid_dataset,valid_dataloader),
+    'test': (test_dataset,test_dataloader) 
 
     """
     
@@ -129,9 +130,9 @@ def get_dataloaders(data_dir:str,batch_size:int):
         batch_size=batch_size
     )
 
-    dataloaders = {'train': train_dataloader,
-            'valid': valid_dataloader,
-            'test': test_dataloader}
+    dataloaders = {'train': (train_dataset,train_dataloader),
+            'valid': (valid_dataset,valid_dataloader),
+            'test': (test_dataset,test_dataloader)}
 
     # Get a batch of the data next(iter(train_dataloader))
     print_data_shape(dataloader = train_dataloader,name = 'train')
@@ -194,7 +195,7 @@ def build_model(name:str,
     model = models_available.get(name,None)
 
     if not model:
-        raise ValueError(f"Model {name} not supported")
+        raise ValueError(f"Model {name} not supported\n Models supported{list(models_available.keys())}")
     
     if device_name not in ['cpu','gpu']:
         raise ValueError(f"Device {device} not supported")
@@ -263,7 +264,8 @@ class Trainer():
                 learning_rate: float,
                 hidden_units:int,
                 epochs: int,
-                gpu: bool):
+                gpu: bool,
+                batch_size: int = 64):
         """
         Args:
             data_dir: the path to the data directory
@@ -282,7 +284,8 @@ class Trainer():
         self.hidden_units = hidden_units
         self.epochs = epochs
         self.gpu = gpu
-
+        self.batch_size = 64
+         
         device_name = 'gpu' if self.gpu else 'cpu'
 
         if device_name == 'gpu':
@@ -300,12 +303,13 @@ class Trainer():
         ### 1 Load the datasets
         print("\033[92m" + "Getting dataloaders" + "\033[0m")
 
-        dataloaders = get_dataloaders(
+        data = get_data(
             data_dir= self.data_dir,
             batch_size = self.batch_size)
-        self.train_dataset, self.valid_dataset, self.test_dataset = (dataloaders['train'], 
-                                                                     dataloaders['valid'],
-                                                                        dataloaders['test'])
+        self.train_dataset, self.train_dataloader =  data['train']
+        self.valid_dataset, self.valid_dataloader = data['valid']
+        self.test_dataset,  self.test_dataloader = data['test']
+        
         print()
 
         ### 2 Create the model 

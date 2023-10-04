@@ -86,11 +86,11 @@ if __name__ == '__main__':
 
     # Test with 
     #vgg16
-    #python train.py './data/' --save_dir './models'  --arch 'vgg16' --learning_rate 0.03 --hidden_units 1024 --epochs 10 --gpu
+    #python train.py './flowers/' --save_dir './models'  --arch 'vgg16' --learning_rate 0.03 --hidden_units 1024 --epochs 10 --gpu
     #densenet121
-    #python train.py './data/' --save_dir './models'  --arch 'densenet121' --learning_rate 0.03 --hidden_units 1024 --epochs 10 --gpu
+    #python train.py './flowers/' --save_dir './models'  --arch 'densenet121' --learning_rate 0.03 --hidden_units 1024 --epochs 10 --gpu
     #alexnet
-    #python train.py './data/' --save_dir './models'  --arch 'alexnet' --learning_rate 0.03 --hidden_units 1024 --epochs 10 --gpu
+    #python train.py './flowers/' --save_dir './models'  --arch 'alexnet' --learning_rate 0.03 --hidden_units 1024 --epochs 10 --gpu
 
     parser = get_input_args()
     args = parser.parse_args()
