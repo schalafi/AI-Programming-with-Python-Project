@@ -226,16 +226,19 @@ def build_model(name:str,
         #'resnet18':'fc' ,
         'alexnet':'classifier',}
 
-    n_ouputs = model.classifier[0].in_features
-    print("Number of outputs in penultimate layer: ", n_ouputs)
+    #get number of input neurons depending the model
+    n_inputs = None 
+    ### CASES
+    
+    print("Number of outputs in penultimate layer: ", n_inputs)
     print("MODEL ARCH: ", model)
 
     # Replace the clasifier (last layer ) with a new one
     model.classifier = th.nn.Sequential(
-    th.nn.BatchNorm1d(n_ouputs),
+    th.nn.BatchNorm1d(n_inputs),
     #input_features must have the the same number of out_features as 
     #norm5 layer in the original pretrained net (DenseNet)
-    th.nn.Linear(in_features=n_ouputs,
+    th.nn.Linear(in_features=n_inputs,
                     out_features=n_hidden_units,
                     bias = True),
     th.nn.ReLU(),
