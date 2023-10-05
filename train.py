@@ -82,7 +82,7 @@ def tests():
 
     
 if __name__ == '__main__':
-    from utils import Trainer
+    from train_utils import Trainer
 
     # Test with 
     #vgg16
@@ -104,7 +104,9 @@ if __name__ == '__main__':
         learning_rate=args.learning_rate,
         hidden_units=args.hidden_units,
         epochs=args.epochs,
-        gpu=args.gpu
+        gpu=args.gpu,
+        #for testing purposes
+        n_minibatches = 2
     )
 
     #print("Tests: ")

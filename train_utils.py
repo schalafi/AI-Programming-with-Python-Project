@@ -219,18 +219,28 @@ def build_model(name:str,
     num_classes =  len(classes_names)
     print("Number of classes: ", num_classes)
 
-    #TODO: Replace last layer using dict
-    #add resnet
-    replaceable_layer = {'vgg16':'classifier',
-        'densenet121':'classifier' ,
-        #'resnet18':'fc' ,
-        'alexnet':'classifier',}
-
     #get number of input neurons depending the model
     n_inputs = None 
-    ### CASES
+
+    n_inputs_dict = {
+        'vgg16': 25088,
+        'alexnet': 9216,
+        'densenet121': 1024
+    }
+    
+    if name == 'alexnet':
+        n_inputs = model.classifier[1].in_features
+
+    elif name == 'vgg16':
+        n_inputs = model.classifier[0].in_features
+    elif name == 'densenet121':
+        n_inputs = model.classifier.in_features
+
     
     print("Number of outputs in penultimate layer: ", n_inputs)
+
+    assert n_inputs in n_inputs_dict.values(), 'Error while passing number of inputs to classifier layer.'
+    
     print("MODEL ARCH: ", model)
 
     # Replace the clasifier (last layer ) with a new one
@@ -243,7 +253,7 @@ def build_model(name:str,
                     bias = True),
     th.nn.ReLU(),
     th.nn.Dropout(p=0.07),
-    th.nn.BatchNorm1d(256),
+    th.nn.BatchNorm1d(n_hidden_units),
     th.nn.Linear(in_features =n_hidden_units,
                  out_features=num_classes,
                  bias = True),
@@ -268,7 +278,9 @@ class Trainer():
                 hidden_units:int,
                 epochs: int,
                 gpu: bool,
-                batch_size: int = 64):
+                batch_size: int = 64,
+                n_minibatches: int = float('inf')
+                ):
         """
         Args:
             data_dir: the path to the data directory
@@ -287,7 +299,8 @@ class Trainer():
         self.hidden_units = hidden_units
         self.epochs = epochs
         self.gpu = gpu
-        self.batch_size = 64
+        self.batch_size = batch_size
+        self.n_minibatches = n_minibatches
          
         device_name = 'gpu' if self.gpu else 'cpu'
 
@@ -340,13 +353,14 @@ class Trainer():
         last_loss_value = self.train()
         print()
 
+        timestamp = time.strftime("%Y%m%d-%H%M%S")
         ### 5 save checkpoint
         checkpoint_utils.save_checkpoint(
             model =  self.model,
             optimizer = self.optimizer,
             epoch = self.epochs,
             loss = last_loss_value,
-            path = self.save_dir)
+            path = self.save_dir + '/' + timestamp +  '-checkpoint.pth' )
         
         print()
             
@@ -354,6 +368,9 @@ class Trainer():
         """
         Return last reported loss on training set
         """
+
+        #print in purple 'Training ...  with n_minibatches = '
+        print("\033[95m" + "Training ...  with n_minibatches=   " + "\033[0m" + str(self.n_minibatches))
 
         train_losses,train_accuracies, valid_losses,valid_accuracies=  training_functions.train(
             model = self.model,
@@ -363,6 +380,7 @@ class Trainer():
             optimizer = self.optimizer,
             device = self.device,
             epochs = self.epochs,
+            n_minibatches = self.n_minibatches,
            
         )
 

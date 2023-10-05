@@ -7,7 +7,8 @@ def train_step(model: th.nn.Module,
           dataloader: th.utils.data.DataLoader,
           criterion: th.nn.Module,
           optimizer: th.optim.Optimizer,
-          device: th.device) -> None:
+          device: th.device,
+          n_minibatches:int = float("inf")) -> None:
     """
     Receive a model, train it with the given optimizer
     by ONE epoch,
@@ -22,6 +23,9 @@ def train_step(model: th.nn.Module,
         criterion: The loss function.
         optimizer: The optimizer to use.
         device: The device to use.
+        n_minibatches: for testing purposes running on 
+            a small number of batches like 3 or 10
+            default: infinite means run on all minibatches to commplete the epoch
     Model weigths are changed in place
     
     Returns:
@@ -40,8 +44,8 @@ def train_step(model: th.nn.Module,
     n_batches= len(dataloader)
     #Iterate over the pairs (X_i,y_i) (features, labels)
     for i, (X,y) in enumerate(dataloader):
-        #if i >= 10:
-        #    break
+        if i >=  n_minibatches:
+            break
         print("Training on batch {} from {} batches".format(i,n_batches))
 
         #move the data to device
@@ -107,7 +111,9 @@ def train_step(model: th.nn.Module,
 def validation_step(model: th.nn.Module,
           dataloader: th.utils.data.DataLoader,
           criterion: th.nn.Module,
-          device: th.device) -> None:
+          device: th.device,
+          n_minibatches:int = float("inf")
+          ) -> None:
     """
     Receive a model, run it  to validate on the given data.
     Use one epoch over the dataset on dataloader.
@@ -119,7 +125,10 @@ def validation_step(model: th.nn.Module,
         valid_dataloader: The validation data.
         criterion: The loss function.
         device: The device to use.
-    
+        n_minibatches: for testing purposes running on 
+            a small number of batches like 3 or 10
+            default: infinite means run on all minibatches to commplete the epoch.
+
     Returns:
         loss_value, accuracy 
     """
@@ -135,8 +144,8 @@ def validation_step(model: th.nn.Module,
 
     #Iterate over the pairs (X_i,y_i) (features, labels)
     for i, (X,y) in enumerate(dataloader):
-        #if i >= 10:
-        #    break
+        if i >= n_minibatches:
+            break 
         #move the data to device
         #must be on the same device that model
         features,labels = X.to(device),y.to(device)
@@ -193,7 +202,9 @@ def train(model: th.nn.Module,
           criterion: th.nn.Module,
           optimizer: th.optim.Optimizer,
           device: th.device, 
-          epochs : int) -> tuple[list[float],list[float],list[float],list[float]]:
+          epochs : int,
+          n_minibatches: int = float('inf')
+          ) -> tuple[list[float],list[float],list[float],list[float]]:
     """
     Receive a model, train it with the given optimizer
     by ONE epoch, and evelate the model.
@@ -210,6 +221,9 @@ def train(model: th.nn.Module,
         optimizer: The optimizer to use.
         device: The device to use.
         epochs: the number of epochs to train
+        n_minibatches: for testing purposes running on 
+            a small number of batches like 3 or 10
+            default: infinite means run on all minibatches to commplete the epoch.
     Model weigths are changed in place
     
     Returns:
@@ -234,7 +248,8 @@ def train(model: th.nn.Module,
         dataloader = train_dataloader,
         criterion = criterion,
         optimizer = optimizer,
-        device = device)
+        device = device,
+        n_minibatches = n_minibatches)
       
       train_losses.append(train_loss)
       train_accuracies.append(train_accuracy)
@@ -242,7 +257,8 @@ def train(model: th.nn.Module,
       valid_loss, valid_accuracy = validation_step(model = model ,
         dataloader = valid_dataloader,
         criterion = criterion,
-        device = device)
+        device = device,
+        n_minibatches=n_minibatches)
       valid_losses.append(valid_loss)
       valid_accuracies.append(valid_accuracy)
       
