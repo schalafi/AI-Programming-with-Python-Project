@@ -1,5 +1,7 @@
 import argparse 
 
+from predict_utils import Predictor 
+
 def get_input_args():
     """
     Get the args for 
@@ -52,4 +54,3 @@ if __name__ == "__main__":
     predictor = Predictor(args)
 
     predictor.predict()
-    
