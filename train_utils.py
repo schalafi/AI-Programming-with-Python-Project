@@ -354,6 +354,7 @@ class Trainer():
         print()
 
         timestamp = time.strftime("%Y%m%d-%H%M%S")
+        
         ### 5 save checkpoint
         checkpoint_utils.save_checkpoint(
             model =  self.model,
