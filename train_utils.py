@@ -168,14 +168,15 @@ def get_label_mapping():
     return class_to_idx
     
 
-def build_model(name:str,
+def build_model(model_name:str,
                 device_name:str,
-                train_dataset:datasets.ImageFolder,
-                n_hidden_units: int
+                n_hidden_units: int,
+                train_dataset:datasets.ImageFolder = None,
+                n_classes: int = None 
                 )-> th.nn.Module:
     """
     Args:
-        name: name of the model
+        model_name: name of the model
         device_name: the device to use (cpu or gpu)
         train_dataset: the training dataset
         n_hidden_units: number of hidden units in the classifier
@@ -192,10 +193,10 @@ def build_model(name:str,
     }
 
     model = None 
-    model = models_available.get(name,None)
+    model = models_available.get(model_name,None)
 
     if not model:
-        raise ValueError(f"Model {name} not supported\n Models supported{list(models_available.keys())}")
+        raise ValueError(f"Model {model_name} not supported\n Models supported{list(models_available.keys())}")
     
     if device_name not in ['cpu','gpu']:
         raise ValueError(f"Device {device} not supported")
@@ -214,10 +215,20 @@ def build_model(name:str,
     for param in model.parameters():
         param.requires_grad = False 
     
-    # get the number of classes 
-    classes_names = train_dataset.classes
-    num_classes =  len(classes_names)
+    # get the number of classes  from the train_dataset or from the n_classes param
+    #classes_names = train_dataset.classes
+
+    num_classes = None
+    if train_dataset:
+        classes = train_dataset.classes
+        num_classes = len(classes)
+    if n_classes:
+        num_classes = n_classes
+
     print("Number of classes: ", num_classes)
+
+    if num_classes is None:
+        raise ValueError("Number of classes is required or you must pass a train_dataset")
 
     #get number of input neurons depending the model
     n_inputs = None 
@@ -228,15 +239,14 @@ def build_model(name:str,
         'densenet121': 1024
     }
     
-    if name == 'alexnet':
+    if model_name == 'alexnet':
         n_inputs = model.classifier[1].in_features
 
-    elif name == 'vgg16':
+    elif model_name == 'vgg16':
         n_inputs = model.classifier[0].in_features
-    elif name == 'densenet121':
+    elif model_name == 'densenet121':
         n_inputs = model.classifier.in_features
 
-    
     print("Number of outputs in penultimate layer: ", n_inputs)
 
     assert n_inputs in n_inputs_dict.values(), 'Error while passing number of inputs to classifier layer.'
@@ -354,6 +364,9 @@ class Trainer():
         print()
 
         timestamp = time.strftime("%Y%m%d-%H%M%S")
+
+        # Get the number of classes in the ouput prediction
+        self.num_classes = len(self.train_dataset.classes)
         
         ### 5 save checkpoint
         checkpoint_utils.save_checkpoint(
@@ -361,7 +374,10 @@ class Trainer():
             optimizer = self.optimizer,
             epoch = self.epochs,
             loss = last_loss_value,
-            path = self.save_dir + '/' + timestamp +  '-checkpoint.pth' )
+            path = self.save_dir + '/' + timestamp +  '-checkpoint.pth',
+            model_name = self.arch,
+            n_hidden_units=self.hidden_units,
+            n_classes=self.num_classes)
         
         print()
             
@@ -370,7 +386,6 @@ class Trainer():
         Return last reported loss on training set
         """
 
-        #print in purple 'Training ...  with n_minibatches = '
         print("\033[95m" + "Training ...  with n_minibatches=   " + "\033[0m" + str(self.n_minibatches))
 
         train_losses,train_accuracies, valid_losses,valid_accuracies=  training_functions.train(
