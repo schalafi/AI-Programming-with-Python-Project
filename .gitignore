@@ -1,6 +1,9 @@
 #ignore dataset 
 /flowers
 
+#ignore model checkpoints 
+/models
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
