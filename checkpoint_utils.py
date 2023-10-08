@@ -1,10 +1,7 @@
 import os
 
 import torch as th
-from train_utils import build_model
-
-
-
+from model_utils import build_model
 
 def save_checkpoint(model: th.nn.Module,
                     optimizer:th.optim.Optimizer,
@@ -77,10 +74,17 @@ def load_checkpoint(path:str ,
     if device_name is not None:
         if not device_name in ['cuda', 'cpu']:
             raise ValueError('Invalid device name: {}'.format(device_name))
-        device = th.device(device_name)
+        selected_device = 'cpu'
+        if device_name == 'cuda':
+            if th.cuda.is_available():
+                selected_device = 'cuda'
+        
+        device = th.device(selected_device)
     else:    
-        device = th.device('cuda' if th.cuda.is_available() else 'cpu')
-
+        device = th.device('cpu')
+        
+    print("\033[94m {}\033[00m" .format('Loading checkpoint: '+ path ))
+    print("Device: ", device)
     checkpoint = th.load(path, map_location=device)
     
     #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
@@ -90,14 +94,13 @@ def load_checkpoint(path:str ,
     n_hidden_units = checkpoint['n_hidden_units']
     n_classes = checkpoint['n_classes']
 
-
-
     # build the model from the model_name (only the architecture)
     # we also need model params
     model = build_model(model_name = model_name,
                         device_name = device_name,
-                        train_dataset=,
-                        n_hidden_units=)
+                        train_dataset=None,
+                        n_hidden_units=n_hidden_units,
+                        n_classes=n_classes)
 
     def build_optimizer(model):
         optimizer = th.optim.Adam(
