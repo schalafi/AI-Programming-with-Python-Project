@@ -106,7 +106,7 @@ if __name__ == '__main__':
         epochs=args.epochs,
         gpu=args.gpu,
         #for testing purposes
-        n_minibatches = 2
+        #n_minibatches = 2
     )
 
     #print("Tests: ")

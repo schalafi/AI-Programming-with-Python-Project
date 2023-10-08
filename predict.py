@@ -52,6 +52,9 @@ if __name__ == "__main__":
     # python predict.py sunflowers.webp ./models/20231006-034221-checkpoint.pth --category_names cat_to_name.json --gpu
     #python predict.py sunflowers.webp ./models/20231007-234912-checkpoint.pth  --category_names cat_to_name.json --gpu
     #python predict.py sunflowers.webp ./models/20231007-234912-checkpoint.pth   --top_k 20
+    #python predict.py sunflowers.webp ./models/20231008-004220-checkpoint.pth   --top_k 3
+
+    
     predictor = Predictor(
         checkpoint_path=args.checkpoint,
         category_names=args.category_names,

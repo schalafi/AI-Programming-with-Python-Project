@@ -207,12 +207,12 @@ class Trainer():
         self.batch_size = batch_size
         self.n_minibatches = n_minibatches
          
-        device_name = 'gpu' if self.gpu else 'cpu'
+        device_name = 'cuda' if self.gpu else 'cpu'
 
-        if device_name == 'gpu':
+        if device_name == 'cuda':
             if not  th.cuda.is_available():
                 print("\033[93m" + "Warning: GPU not available" + "\033[0m")
-                print('Cpu will be used')
+                print('CPU will be used')
                 device_name  = 'cpu'
         
         self.device = th.device(device_name)
@@ -237,7 +237,7 @@ class Trainer():
         ### Use the given architecture and replace the classifier with a new trainable module (layers and activations)
 
         self.model = build_model(model_name = self.arch,
-                device_name = 'gpu' if self.gpu else 'cpu',
+                device_name = 'cuda' if self.gpu else 'cpu',
                 train_dataset = self.train_dataset,
                 n_hidden_units =  self.hidden_units)
         print()
