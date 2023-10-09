@@ -240,6 +240,7 @@ class Trainer():
                 device_name = 'cuda' if self.gpu else 'cpu',
                 train_dataset = self.train_dataset,
                 n_hidden_units =  self.hidden_units)
+        assert hasattr(self.model.classifier, 'class_to_idx'), "Model has not attribute class_to_idx"
         print()
 
         ### 3 Define the loss function and optimizer

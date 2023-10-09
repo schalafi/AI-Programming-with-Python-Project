@@ -40,7 +40,8 @@ def save_checkpoint(model: th.nn.Module,
         'loss': loss,
         'model_name': model_name,
         'n_hidden_units': n_hidden_units,
-        'n_classes': n_classes
+        'n_classes': n_classes,
+        'class_to_idx': model.classifier.class_to_idx
     }
     
     print("\033[94m {}\033[00m" .format('Creating checkpoint: '+ path ))
@@ -88,12 +89,12 @@ def load_checkpoint(path:str ,
     print("Device: ", device)
     checkpoint = th.load(path, map_location=device)
     
-    #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     epoch = checkpoint['epoch']
     loss = checkpoint['loss']
     model_name = checkpoint['model_name']
     n_hidden_units = checkpoint['n_hidden_units']
     n_classes = checkpoint['n_classes']
+    class_to_idx = checkpoint['class_to_idx']
 
     # build the model from the model_name (only the architecture)
     # we also need model params
@@ -114,9 +115,10 @@ def load_checkpoint(path:str ,
     optimizer = build_optimizer(model)
 
     #load the params into the model
-    model.load_state_dict(checkpoint['model_state_dict'])
+    model.classifier.load_state_dict(checkpoint['model_state_dict'])
     # Ensure the model is on the correct device
     model.to(device)
+    model.classifier.class_to_idx = class_to_idx
 
     # load the state of the optimizer 
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])

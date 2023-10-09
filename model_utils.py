@@ -106,4 +106,8 @@ def build_model(model_name:str,
     th.nn.LogSoftmax(dim = 1)).to(device)
     #print("Classifier (trainable layers): ", model.classifier)
 
+    # add class_to_idx mapping class -> index
+    if  train_dataset:
+        model.classifier.class_to_idx = train_dataset.class_to_idx
+
     return model

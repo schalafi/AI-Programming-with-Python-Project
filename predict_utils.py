@@ -81,15 +81,18 @@ class Predictor:
         self.category_names = category_names
         self.gpu = gpu   
         
+        self.class_to_idx = None 
 
         # 1 load the checkpoint
         print('Loading checkpoint: {}'.format(checkpoint_path))
               
-        epoch, loss, model_name, n_hidden_units, n_classes,model,optimizer  = load_checkpoint(
+        epoch, loss, model_name, n_hidden_units, n_classes,model,optimizer = load_checkpoint(
                     path  = self.checkpoint_path,
                     device_name = 'cuda' if gpu else 'cpu')
-        self.model_name = model 
+        self.model_name = model_name 
         self.model = model 
+
+        self.class_to_idx = self.model.classifier.class_to_idx
         
         selected_device = 'cpu'
         if gpu:
@@ -147,19 +150,30 @@ class Predictor:
             #probabilities, location on the array (the classes)
             probs, indices = probabilities.topk(k=topk, dim=1) 
 
+            # get one dimensional arrays
+            probs = probs.squeeze()
+            indices = indices.squeeze()
+
             return probs, indices
 
         # 2 predict on the input image
-        probs, indices = infer(input_X)
+        probs,indices = infer(input_X)  
         # pass to cpu
-        probs, indices  = probs.cpu(),indices.cpu() 
+        probs, indices  = probs.cpu().numpy(),indices.cpu().numpy()
+        # get the mapping class -> index
+        # mapping index -> class 
+        idx_to_classes = {x:y for y,x in self.class_to_idx.items()}
+        top_classes = [idx_to_classes[i] for i in indices] 
 
         with open(self.category_names, 'r') as f:
             cat_to_name = json.load(f)
 
         # 3 get class(es) name(s) 
         classes = []
+    
         for i in range(topk):
-            classes.append(cat_to_name[str(indices[0][i].item())])
+            class_ = cat_to_name[top_classes[i]]
+            classes.append(class_)
 
-        return classes, probs[0]
+        return probs,classes
+

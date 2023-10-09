@@ -44,10 +44,10 @@ def main()-> None:
     on an image.
 
     Usage examples 
-    python predict.py sunflowers.webp ./models/20231006-034221-checkpoint.pth --category_names cat_to_name.json --gpu
-    python predict.py sunflowers.webp ./models/20231007-234912-checkpoint.pth  --category_names cat_to_name.json --gpu
-    python predict.py sunflowers.webp ./models/20231007-234912-checkpoint.pth   --top_k 20
-    python predict.py sunflowers.webp ./models/20231008-004220-checkpoint.pth   --top_k 3
+    python predict.py sunflowers.webp path/to/checkpoint.pth --category_names cat_to_name.json --gpu
+    python predict.py sunflowers.webp path/to/checkpoint.pth  --category_names cat_to_name.json --gpu
+    python predict.py sunflowers.webp path/to/checkpoint.pth   --top_k 20
+    python predict.py sunflowers.webp path/to/checkpoint.pth   --top_k 3
     """
 
     # get the input's parser
@@ -61,7 +61,7 @@ def main()-> None:
         category_names=args.category_names,
         gpu = args.gpu)
 
-    classes, probs = predictor.predict(image_path = args.input,
+    probs, classes = predictor.predict(image_path = args.input,
                       topk=args.top_k)
     print()
     print("The class name and the probability of the class" )
