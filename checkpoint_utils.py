@@ -34,7 +34,8 @@ def save_checkpoint(model: th.nn.Module,
 
     checkpoint = {
         'epoch': epoch,
-        'model_state_dict': model.state_dict(),
+        # save only the classifier portion of the model
+        'model_state_dict': model.classifier.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
         'loss': loss,
         'model_name': model_name,

@@ -38,29 +38,28 @@ def get_input_args():
 
     return parser     
 
+def main()-> None:
+    """
+    Main function for prediction
+    on an image.
 
-if __name__ == "__main__":
-    
+    Usage examples 
+    python predict.py sunflowers.webp ./models/20231006-034221-checkpoint.pth --category_names cat_to_name.json --gpu
+    python predict.py sunflowers.webp ./models/20231007-234912-checkpoint.pth  --category_names cat_to_name.json --gpu
+    python predict.py sunflowers.webp ./models/20231007-234912-checkpoint.pth   --top_k 20
+    python predict.py sunflowers.webp ./models/20231008-004220-checkpoint.pth   --top_k 3
+    """
+
     # get the input's parser
     parser = get_input_args()
     args = parser.parse_args()
 
     print("Input args are: \n", args)
 
-
-    # test with 
-    # python predict.py sunflowers.webp ./models/20231006-034221-checkpoint.pth --category_names cat_to_name.json --gpu
-    #python predict.py sunflowers.webp ./models/20231007-234912-checkpoint.pth  --category_names cat_to_name.json --gpu
-    #python predict.py sunflowers.webp ./models/20231007-234912-checkpoint.pth   --top_k 20
-    #python predict.py sunflowers.webp ./models/20231008-004220-checkpoint.pth   --top_k 3
-
-    
     predictor = Predictor(
         checkpoint_path=args.checkpoint,
         category_names=args.category_names,
-        gpu = args.gpu,
-
-    )
+        gpu = args.gpu)
 
     classes, probs = predictor.predict(image_path = args.input,
                       topk=args.top_k)
@@ -68,3 +67,10 @@ if __name__ == "__main__":
     print("The class name and the probability of the class" )
     for i in range(len(classes)):
         print(f'{classes[i].ljust(25)} {probs[i].item():.3f}')
+
+
+
+if __name__ == "__main__":
+    main()
+    
+    

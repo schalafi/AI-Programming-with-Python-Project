@@ -1,5 +1,7 @@
 import argparse 
 
+from train_utils import Trainer
+
 def get_input_args():
     """
     Get the args for training the network
@@ -42,7 +44,6 @@ def get_input_args():
                         #default=5
                         )
     parser.add_argument('--gpu',
-                        #type = bool,
                         action = 'store_true',
                         help = 'pass if you want to use gpu, otherwise will not train on gpu',
                         )
@@ -78,24 +79,21 @@ def tests():
     print('Done')
 
 
-
-
-    
-if __name__ == '__main__':
-    from train_utils import Trainer
-
-    # Test with 
+def main()-> None:
+    """
+    Main function for training the network
+    Usage examples:
     #vgg16
-    #python train.py './flowers/' --save_dir './models'  --arch 'vgg16' --learning_rate 0.03 --hidden_units 1024 --epochs 10 --gpu
+    python train.py './flowers/' --save_dir './models'  --arch 'vgg16' --learning_rate 0.03 --hidden_units 1024 --epochs 10 --gpu
     #densenet121
-    #python train.py './flowers/' --save_dir './models'  --arch 'densenet121' --learning_rate 0.03 --hidden_units 1024 --epochs 10 --gpu
+    python train.py './flowers/' --save_dir './models'  --arch 'densenet121' --learning_rate 0.03 --hidden_units 1024 --epochs 10 --gpu
     #alexnet
-    #python train.py './flowers/' --save_dir './models'  --arch 'alexnet' --learning_rate 0.03 --hidden_units 1024 --epochs 10 --gpu
-
+    python train.py './flowers/' --save_dir './models'  --arch 'alexnet' --learning_rate 0.03 --hidden_units 1024 --epochs 10 --gpu
+    """
     parser = get_input_args()
     args = parser.parse_args()
-    #print all input args
-    print(args)
+
+    print("Input args are: \n", args)
 
     trainer = Trainer(
         data_dir=args.data_dir,
@@ -109,6 +107,9 @@ if __name__ == '__main__':
         #n_minibatches = 2
     )
 
-    #print("Tests: ")
-    #tests()
+if __name__ == '__main__':
+    main()
+    
 
+    
+    
